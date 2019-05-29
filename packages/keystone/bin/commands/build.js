@@ -40,14 +40,15 @@ module.exports = {
 
     if (apps) {
       await Promise.all(
-        apps.map(app => {
-          return app.build({
-            apiPath: '/admin/api',
-            distDir: resolvedDistDir,
-            graphiqlPath: '/admin/graphiql',
-            keystone,
-          });
-        })
+        apps
+          .filter(({ targets } = {}) => targets && targets[target] && targets[target].build)
+          .map(app =>
+            require(app.targets[target].build)({
+              distDir: resolvedDistDir,
+              keystone,
+              app,
+            })
+          )
       );
 
       spinner.succeed(
